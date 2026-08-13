@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DM × SCP Project Network</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div><strong>DM × SCP Project Network</strong><span>Resource-aware CPM / PDM</span></div>
+  <nav><button class="viewBtn active" data-view="network">Network</button><button class="viewBtn" data-view="releases">Releases</button><button class="viewBtn" data-view="critical">Critical Path</button></nav>
+</header>
+<main>
+<section class="hero">
+ <div><span class="eyebrow">12-person release plan</span><h1>整體專案網路圖與要徑</h1><p>以既有 WBS 的 86 週資源負載排程重建 CPM/PDM。紅色節點為零浮時要徑，橘色為 2 個工作天內的 Near-critical 工作。</p></div>
+ <div class="kpis"><div><strong id="kWeeks"></strong><span>weeks</span></div><div><strong id="kTasks"></strong><span>WBS tasks</span></div><div><strong id="kCrit"></strong><span>critical nodes</span></div><div><strong id="kNear"></strong><span>near-critical</span></div></div>
+</section>
+
+<section class="toolbar">
+ <input id="search" placeholder="搜尋 WBS、功能、模組、Owner…">
+ <select id="milestone"><option value="ALL">全部里程碑</option></select>
+ <select id="platform"><option value="ALL">全部平台</option><option>DM</option><option>SCP</option><option>Cross</option></select>
+ <div class="seg"><button class="filterBtn active" data-filter="ALL">全部</button><button class="filterBtn" data-filter="CRITICAL">要徑</button><button class="filterBtn" data-filter="NEAR">≤2d Float</button></div>
+</section>
+
+<section id="networkView" class="view active">
+ <div class="legend"><span class="dot crit"></span>Critical path <span class="dot near"></span>Near-critical <span class="dot dm"></span>DM <span class="dot scp"></span>SCP <span class="dot cross"></span>Release / Cross</div>
+ <div id="networkWrap" class="networkWrap"><svg id="networkSvg"></svg></div>
+</section>
+
+<section id="releasesView" class="view">
+ <div class="sectionHead"><h2>Release Gates</h2><p>每一階段都 release 給使用者，因此 Release Gate 本身就是本計畫的主要進度約束。</p></div>
+ <div id="releaseGrid" class="releaseGrid"></div>
+</section>
+
+<section id="criticalView" class="view">
+ <div class="sectionHead"><h2>Critical & Near-critical</h2><p>Critical = Total Float 0；Near-critical = Total Float 1–2 個工作天。</p></div>
+ <div class="criticalLayout"><div><h3>Critical Path</h3><div id="criticalList"></div></div><div><h3>Near-critical workstreams</h3><div id="nearList"></div></div></div>
+</section>
+</main>
+<div id="backdrop" class="backdrop hidden"></div>
+<aside id="drawer" class="drawer"><button id="closeDrawer">×</button><div id="drawerBody"></div></aside>
+<script src="data.js"></script><script src="app.js"></script>
+</body></html>
