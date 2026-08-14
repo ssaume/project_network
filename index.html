@@ -56,6 +56,10 @@
     <option value="3.6" selected>時間軸：標準</option>
     <option value="5.2">時間軸：詳細</option>
   </select>
+  <div class="editActions">
+    <button id="undoBtn" class="editBtn" disabled>↶ Undo</button>
+    <button id="resetBtn" class="editBtn danger" disabled>Reset</button>
+  </div>
   <div class="seg">
     <button class="filterBtn active" data-filter="ALL">全部</button>
     <button class="filterBtn" data-filter="CRITICAL">要徑</button>
@@ -71,7 +75,7 @@
     <span><i class="swatch scp"></i>SCP</span>
     <span><i class="swatch cross"></i>Cross / Release</span>
     <span><i class="floatLine"></i>可用 Float</span>
-    <span class="legendHint">點擊任務條查看 ES/EF/LS/LF 與前置關係</span>
+    <span class="legendHint">拖曳任務條調整時間；拖曳左側 WBS 調整同模組順序；點擊里程碑可收合</span>
   </div>
 
   <div class="ganttShell">
