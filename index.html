@@ -1,44 +1,124 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DM × SCP Project Network</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="DM × SCP 傳統甘特圖搭配要徑法的互動專案網路原型">
+<title>DM × SCP Gantt + CPM</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header class="topbar">
-  <div><strong>DM × SCP Project Network</strong><span>Resource-aware CPM / PDM</span></div>
-  <nav><button class="viewBtn active" data-view="network">Network</button><button class="viewBtn" data-view="releases">Releases</button><button class="viewBtn" data-view="critical">Critical Path</button></nav>
+  <div class="brand">
+    <strong>DM × SCP Project Control</strong>
+    <span>Traditional Gantt + Critical Path Method</span>
+  </div>
+  <nav>
+    <button class="viewBtn active" data-view="gantt">甘特圖 / Gantt</button>
+    <button class="viewBtn" data-view="releases">Release Gates</button>
+    <button class="viewBtn" data-view="critical">要徑 / CPM</button>
+  </nav>
 </header>
+
 <main>
 <section class="hero">
- <div><span class="eyebrow">12-person release plan</span><h1>整體專案網路圖與要徑</h1><p>以既有 WBS 的 86 週資源負載排程重建 CPM/PDM。紅色節點為零浮時要徑，橘色為 2 個工作天內的 Near-critical 工作。</p></div>
- <div class="kpis"><div><strong id="kWeeks"></strong><span>weeks</span></div><div><strong id="kTasks"></strong><span>WBS tasks</span></div><div><strong id="kCrit"></strong><span>critical nodes</span></div><div><strong id="kNear"></strong><span>near-critical</span></div></div>
+  <div>
+    <span class="eyebrow">12-person · staged release plan</span>
+    <h1>傳統甘特圖 × 要徑法專案網路</h1>
+    <p>保留原 86 週資源負載排程，將 CPM 的 Critical Path、Near-critical 與 FS／SS／FF 相依關係直接疊加在甘特圖上。</p>
+  </div>
+  <div class="kpis">
+    <div><strong id="kWeeks"></strong><span>Project weeks</span></div>
+    <div><strong id="kTasks"></strong><span>WBS tasks</span></div>
+    <div><strong id="kCrit"></strong><span>Critical nodes</span></div>
+    <div><strong id="kNear"></strong><span>Near-critical</span></div>
+  </div>
+</section>
+
+<section class="criticalStrip">
+  <div class="stripLabel">Critical Path</div>
+  <div id="criticalStripPath" class="stripPath"></div>
 </section>
 
 <section class="toolbar">
- <input id="search" placeholder="搜尋 WBS、功能、模組、Owner…">
- <select id="milestone"><option value="ALL">全部里程碑</option></select>
- <select id="platform"><option value="ALL">全部平台</option><option>DM</option><option>SCP</option><option>Cross</option></select>
- <div class="seg"><button class="filterBtn active" data-filter="ALL">全部</button><button class="filterBtn" data-filter="CRITICAL">要徑</button><button class="filterBtn" data-filter="NEAR">≤2d Float</button></div>
+  <input id="search" type="search" placeholder="搜尋 WBS、功能、模組、Owner、Use Case…">
+  <select id="milestone"><option value="ALL">全部里程碑</option></select>
+  <select id="platform">
+    <option value="ALL">全部平台</option><option>DM</option><option>SCP</option><option>Cross</option>
+  </select>
+  <select id="dependencyMode">
+    <option value="CRITICAL">關聯線：只顯示要徑</option>
+    <option value="ALL">關聯線：全部</option>
+    <option value="NONE">關聯線：隱藏</option>
+  </select>
+  <select id="zoom">
+    <option value="2.3">時間軸：精簡</option>
+    <option value="3.6" selected>時間軸：標準</option>
+    <option value="5.2">時間軸：詳細</option>
+  </select>
+  <div class="seg">
+    <button class="filterBtn active" data-filter="ALL">全部</button>
+    <button class="filterBtn" data-filter="CRITICAL">要徑</button>
+    <button class="filterBtn" data-filter="NEAR">要徑＋近要徑</button>
+  </div>
 </section>
 
-<section id="networkView" class="view active">
- <div class="legend"><span class="dot crit"></span>Critical path <span class="dot near"></span>Near-critical <span class="dot dm"></span>DM <span class="dot scp"></span>SCP <span class="dot cross"></span>Release / Cross</div>
- <div id="networkWrap" class="networkWrap"><svg id="networkSvg"></svg></div>
+<section id="ganttView" class="view active">
+  <div class="legend">
+    <span><i class="swatch crit"></i>Critical / Float 0</span>
+    <span><i class="swatch near"></i>Near-critical / Float ≤2d</span>
+    <span><i class="swatch dm"></i>DM</span>
+    <span><i class="swatch scp"></i>SCP</span>
+    <span><i class="swatch cross"></i>Cross / Release</span>
+    <span><i class="floatLine"></i>可用 Float</span>
+    <span class="legendHint">點擊任務條查看 ES/EF/LS/LF 與前置關係</span>
+  </div>
+
+  <div class="ganttShell">
+    <div class="taskPane" id="taskPane">
+      <div class="taskHead">
+        <div class="cWbs">WBS</div><div class="cTask">Task / Capability</div><div class="cOwner">Owner</div><div class="cDur">Dur.</div><div class="cFloat">Float</div>
+      </div>
+      <div id="taskRows"></div>
+    </div>
+
+    <div class="timelinePane" id="timelinePane">
+      <div id="timelineCanvas" class="timelineCanvas">
+        <div id="timelineHeader" class="timelineHeader"></div>
+        <div id="timelineRows" class="timelineRows"></div>
+        <svg id="dependencySvg" class="dependencySvg" aria-label="Task dependencies"></svg>
+      </div>
+    </div>
+  </div>
 </section>
 
 <section id="releasesView" class="view">
- <div class="sectionHead"><h2>Release Gates</h2><p>每一階段都 release 給使用者，因此 Release Gate 本身就是本計畫的主要進度約束。</p></div>
- <div id="releaseGrid" class="releaseGrid"></div>
+  <div class="sectionHead">
+    <h2>Release Gates</h2>
+    <p>每個階段都交付給使用者，因此 R0–R7 Release Gate 是整體排程的主要零浮時約束。</p>
+  </div>
+  <div id="releaseGrid" class="releaseGrid"></div>
 </section>
 
 <section id="criticalView" class="view">
- <div class="sectionHead"><h2>Critical & Near-critical</h2><p>Critical = Total Float 0；Near-critical = Total Float 1–2 個工作天。</p></div>
- <div class="criticalLayout"><div><h3>Critical Path</h3><div id="criticalList"></div></div><div><h3>Near-critical workstreams</h3><div id="nearList"></div></div></div>
+  <div class="sectionHead">
+    <h2>CPM 控制面板</h2>
+    <p>Critical = Total Float 0；Near-critical = Total Float 1–2 個工作天。建議兩者一起納入週會控管。</p>
+  </div>
+  <div class="criticalLayout">
+    <div><h3>Critical Path</h3><div id="criticalList"></div></div>
+    <div><h3>Near-critical workstreams</h3><div id="nearList"></div></div>
+  </div>
 </section>
 </main>
+
 <div id="backdrop" class="backdrop hidden"></div>
-<aside id="drawer" class="drawer"><button id="closeDrawer">×</button><div id="drawerBody"></div></aside>
-<script src="data.js"></script><script src="app.js"></script>
-</body></html>
+<aside id="drawer" class="drawer" aria-hidden="true">
+  <button id="closeDrawer" aria-label="關閉">×</button>
+  <div id="drawerBody"></div>
+</aside>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
